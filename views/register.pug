@@ -1,0 +1,20 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(http-equiv="X-UA-Compatible", content="IE=edge")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Document
+  body
+    each err in registrationErrors
+      p #{err}
+    form(action="/users", method="post")
+      label(for="first-name") First Name
+      input(type="text", name="firstName", id="first-name", placeholder="Johnny")
+      label(for="last-name") Last Name
+      input(type="text", name="lastName", id="last-name", placeholder="Appleseed")
+      label(for="email") Email
+      input(type="email", name="email", id="email")
+      label(for="password") Password
+      input(type="password", name="password", id="password")
+      input(type="submit", value="Submit")

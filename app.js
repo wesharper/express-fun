@@ -1,4 +1,5 @@
 import express from "express";
+import bodyParser from "body-parser";
 const app = express();
 const port = 3000;
 
@@ -6,6 +7,8 @@ const port = 3000;
 // express.static configures the express static file server, which is middleware
 // the param 'static' determines which folder express will use to look for static files
 app.use(express.static("static"));
+
+app.use(bodyParser.urlencoded());
 
 // app.set is express's way of managing global server settings, which are
 // basically global variables that the server has access to
@@ -54,6 +57,37 @@ app.get("/users/:id", (request, response) => {
   const pageTitle = `${user.name} home page`;
 
   response.render("user", { user: user, title: pageTitle });
+});
+
+let registrationErrors = [];
+
+app.get("/register", (req, res) => {
+  console.log(users);
+  res.render("register", { registrationErrors });
+});
+
+const users = [];
+
+app.post("/users", (req, res) => {
+  // this will prevent errors from previous forms from getting pushed into the array
+  registrationErrors = [];
+
+  const { firstName, lastName, email, password } = req.body;
+  if (firstName.length < 1) {
+    registrationErrors.push("Must have a first name");
+  }
+  if (lastName.length < 1) {
+    registrationErrors.push("Must have a last name");
+  }
+
+  if (registrationErrors.length > 0) {
+    res.redirect("/register");
+    // this is needed to prevent res.redirect from running twice
+    return;
+  } else {
+    users.push(req.body);
+  }
+  res.redirect("/register");
 });
 
 app.listen(port, () => {
