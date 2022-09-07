@@ -1,7 +1,12 @@
 import express from "express";
 import bodyParser from "body-parser";
+
+import sqlite3 from "sqlite3";
+
 const app = express();
 const port = 3000;
+
+const db = new sqlite3.Database("db.db");
 
 // app.use is express's way of saying we're going to use this thing as middleware
 // express.static configures the express static file server, which is middleware
@@ -62,11 +67,8 @@ app.get("/users/:id", (request, response) => {
 let registrationErrors = [];
 
 app.get("/register", (req, res) => {
-  console.log(users);
   res.render("register", { registrationErrors });
 });
-
-const users = [];
 
 app.post("/users", (req, res) => {
   // this will prevent errors from previous forms from getting pushed into the array
@@ -85,9 +87,28 @@ app.post("/users", (req, res) => {
     // this is needed to prevent res.redirect from running twice
     return;
   } else {
-    users.push(req.body);
+    db.run(
+      "INSERT INTO users (first_name, last_name, email, password, created_at, updated_at) VALUES ($firstName, $lastName, $email, $password, $createdAt, $updatedAt)",
+      {
+        $firstName: firstName,
+        $lastName: lastName,
+        $email: email,
+        $password: password,
+        $createdAt: Date.now().toString(),
+        $updatedAt: Date.now().toString(),
+      }
+    );
   }
-  res.redirect("/register");
+  res.redirect("/users");
+});
+
+/**
+ * Displays a page with all the users
+ */
+app.get("/users", (req, res) => {
+  db.all("SELECT * FROM users", (err, users) => {
+    res.render("users", { users });
+  });
 });
 
 app.listen(port, () => {
