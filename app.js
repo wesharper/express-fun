@@ -1,5 +1,6 @@
 import express from "express";
 import bodyParser from "body-parser";
+import session from "express-session";
 
 import sqlite3 from "sqlite3";
 
@@ -14,6 +15,15 @@ const db = new sqlite3.Database("db.db");
 app.use(express.static("static"));
 
 app.use(bodyParser.urlencoded());
+
+app.use(
+  session({
+    secret: "super secret",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false },
+  })
+);
 
 // app.set is express's way of managing global server settings, which are
 // basically global variables that the server has access to
@@ -109,6 +119,17 @@ app.get("/users", (req, res) => {
   db.all("SELECT * FROM users", (err, users) => {
     res.render("users", { users });
   });
+});
+
+app.get("/see-session", (req, res) => {
+  res.render("session", {
+    text: req.session.text,
+  });
+});
+
+app.get("/set-session", (req, res) => {
+  req.session.text = "hello world";
+  res.redirect("/see-session");
 });
 
 app.listen(port, () => {
